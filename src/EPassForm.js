@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import ModalComponent from "./ModalComponent";
 
 const formSchema = Yup.object().shape({
   name: Yup.string().required(),
@@ -24,6 +25,9 @@ const formSchema = Yup.object().shape({
 });
 
 export default function EPassForm() {
+  const [data, setdata] = useState({});
+  const [showModal, setshowModal] = useState(false);
+  const [formErrors, setformErrors] = useState({});
   return (
     <>
       <h1>EPass Form</h1>
@@ -38,11 +42,19 @@ export default function EPassForm() {
           vehicleType: "",
           travelDate: null,
         }}
-        onSubmit={(data) => console.log(data)}
+        onSubmit={(data) => setdata(data)}
         validationSchema={formSchema}
       >
-        {({ handleSubmit, handleChange, handleBlur, errors, touched }) => {
-          console.log(touched.name);
+        {({
+          handleSubmit,
+          handleChange,
+          handleBlur,
+          errors,
+          touched,
+          values,
+        }) => {
+          setdata(values);
+          setformErrors(errors);
           return (
             <form onSubmit={handleSubmit}>
               <label htmlFor="PersonName">Name</label>
@@ -137,11 +149,22 @@ export default function EPassForm() {
                 <div id="travelDate-error">{errors.travelDate}</div>
               )}
               <br />
-              <button type="submit">Submit</button>
+              <button
+                type="submit"
+                onClick={() => {
+                  console.log(Object.keys(formErrors).length);
+                  return Object.keys(formErrors).length >= 1
+                    ? setshowModal(false)
+                    : setshowModal(true);
+                }}
+              >
+                Submit
+              </button>
             </form>
           );
         }}
       </Formik>
+      {showModal ? <ModalComponent formData={data} /> : ""}
     </>
   );
 }
